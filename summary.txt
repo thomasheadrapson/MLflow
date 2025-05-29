@@ -1,0 +1,11 @@
+Random Forest Trials Summary:
+---------------------------
+🏆 Best Experiment Name: challenge experiment 1_20250529_213125
+🎯 Best Run Name: powerful-ape-740
+
+Best Model Parameters:
+🌲 Number of Trees: 1837
+📏 Max Tree Depth: 31
+📎 Min Samples Split: 9
+🍂 Min Samples Leaf: 1
+📊 Best CV Score: 0.8824
