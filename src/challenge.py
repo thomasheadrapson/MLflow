@@ -10,6 +10,9 @@ from scipy.stats import randint
 
 from datetime import datetime
 
+data_location = "data"
+data_file = "fake_data.csv"
+
     # 1. Chargement et préparation des données:
     # Créez une fonction load_and_prep_data qui va charger les données à partir d'un fichier CSV et les préparer pour l'entraînement.a Chargement et préparation des données:
     # Cette fonction doit lire les données, séparer les caractéristiques (features) des étiquettes (labels), et diviser les données en ensembles d'entraînement et de validation.
@@ -30,6 +33,8 @@ def load_and_prep_data(data_loc:str):
     
     return train_test_split(X, y, test_size = 0.2, random_state = 321)
 
+def setup_mlflow (experiment, uri):
+    
 def main():
     ###
    
@@ -45,7 +50,7 @@ def main():
     client = mlflow.tracking.MlflowClient()
     experiment = mlflow.get_experiment_by_name(current_experiment)
     if experiment:
-        current_experiment = current_experiment + "_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+        current_experiment = current_experiment + "_" + datetime.now().strftime("%y%m%d_%H%M%S")
     client.create_experiment(current_experiment)
     
     # Utilisez MlflowClient pour gérer les expériences et les exécutions.
