@@ -10,19 +10,21 @@ from scipy.stats import randint
 
 from datetime import datetime
 
-data_location = "data"
-data_file = "fake_data.csv"
 
-    # 1. Chargement et préparation des données:
+
+
+
     # Créez une fonction load_and_prep_data qui va charger les données à partir d'un fichier CSV et les préparer pour l'entraînement.a Chargement et préparation des données:
     # Cette fonction doit lire les données, séparer les caractéristiques (features) des étiquettes (labels), et diviser les données en ensembles d'entraînement et de validation.
-    # Utilisez train_test_split de scikit-learn pour la division des données.
+
     
-def load_and_prep_data(data_loc:str):
-    ### Loads and prepares data ###
+def load_and_prep_data(data_file: str, data_location: str):
+    ###
+    # Loads and prepares data
+    ###
     
-    #load data
-    data = pd.read_csv(data_loc)
+    # load data
+    data = pd.read_csv(f"{data_location}/{data_file}")
     
     # extract features
     X = data.drop(columns = ['date', 'demand'])
@@ -31,30 +33,55 @@ def load_and_prep_data(data_loc:str):
     # extract target
     y = data.demand
     
-    return train_test_split(X, y, test_size = 0.2, random_state = 321)
-
-def setup_mlflow (experiment, uri):
+    # Utilisez train_test_split de scikit-learn pour la division des données.
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 321)
     
-def main():
+    return X_train, X_test, y_train, y_test
+
+
+def setup_mlflow (experiment_name, uri):
     ###
-   
-    # 2. Configuration de MLflow:
+    ###
 
-    # Définissez un nom d'expérience pour MLflow.
-    current_experiment = "challenge experiment 1"
-    
     # Configurez le suivi avec l'URI de MLflow.
-    mlflow.set_tracking_uri("http://127.0.0.1:8080")
+    mlflow.set_tracking_uri(uri)
     
     # Vérifiez si une expérience existe déjà avec ce nom et créez-la si nécessaire.
-    client = mlflow.tracking.MlflowClient()
-    experiment = mlflow.get_experiment_by_name(current_experiment)
+    client = MlflowClient()
+    experiment = mlflow.get_experiment_by_name(experiment_name)
     if experiment:
-        current_experiment = current_experiment + "_" + datetime.now().strftime("%y%m%d_%H%M%S")
-    client.create_experiment(current_experiment)
+        experiment_name = experiment_name + "_" + datetime.now().strftime("%Y%m%d_%H%M%S")
+    experiment_id = client.create_experiment(experiment_name)
     
     # Utilisez MlflowClient pour gérer les expériences et les exécutions.
-    mlflow.set_experiment(current_experiment)
+    mlflow.set_experiment(experiment_name)    
+
+    return client, expermiment_id
+
+
+def main():
+    ###
+    ###
+    
+    # 1. Chargement et préparation des données:
+    
+    # load/define data location variables
+    data_location = "data"
+    data_file = "fake_data.csv"
+    
+    # load data_file from data_location and prepare
+    X_train, X_test, y_train, y_test = load_and_prep_data(data_file, data_location)
+    
+    
+    # 2. Configuration de MLflow:
+    
+    # load/define mlflow setup variables
+    # Définissez un nom d'expérience pour MLflow.
+    current_experiment_name = "challenge_experiment_1"
+    tracking_uri = "http://127.0.0.1:8080"
+    
+    client, experiment_id = set_up_mlflow(current_experiment_name, tracking_uri)
+    
     
     # 3. Activation de l'auto-enregistrement (autologging):
 
@@ -86,7 +113,6 @@ def main():
     )
     
     # Entraînez le modèle avec les données d'entraînement.
-    X_train, X_test, y_train, y_test = load_and_prep_data("data/fake_data.csv")
     random_search.fit(X_train, y_train)
     
     
@@ -94,9 +120,10 @@ def main():
 
     # Récupérez les meilleurs hyperparamètres et le score de validation croisée (CV score) du meilleur modèle.
     best_params = random_search.best_params_
+    
     # Utilisez la fonction de l'API python mlflow MlflowClient pour rechercher les exécutions et identifier celle ayant les meilleurs hyperparamètres (vous pouvez vous aider de la documentation en ligne).
     current_experiment_runs = client.search_runs(
-        experiment_ids = [client.get_experiment_by_name(current_experiment).experiment_id],
+        experiment_ids = [client.get_experiment_by_name(current_experiment_name).experiment_id],
         filter_string = ""
     )
     
